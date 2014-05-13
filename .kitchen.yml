@@ -1,0 +1,45 @@
+---
+driver:
+  name: vagrant
+  require_chef_omnibus: true
+  customize:
+    memory: 512
+
+provisioner:
+  name: chef_solo
+
+platforms:
+- name: ubuntu-12.04
+  run_list:
+  - recipe[apt]
+- name: centos-6.5
+  run_list:
+  - recipe[yum-epel]
+
+suites:
+- name: default
+  run_list:
+  - recipe[collectd]
+  - recipe[collectd::attribute_driven]
+  attributes:
+    collectd:
+      version: 5.4.0
+      url: https://s3.amazonaws.com/collectd-5.4.0/collectd-5.4.0.tar.gz
+      checksum: c434548789d407b00f15c361305766ba4e36f92ccf2ec98d604aab2a46005239
+      graphite_ipaddress: localhost
+      plugins:
+        write_graphite:
+          config: { Prefix: "collectd." }
+        syslog:
+          config: { LogLevel: "Info" }
+        disk: { }
+        swap: { }
+        memory: { }
+        cpu: { }
+        interface:
+          config: { Interface: "lo", IgnoreSelected: true }
+        df:
+          config:
+            ReportReserved: false
+            FSType: [ "proc", "sysfs", "fusectl", "debugfs", "devtmpfs", "devpts", "tmpfs" ]
+            IgnoreSelected: true
